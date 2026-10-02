@@ -1,0 +1,63 @@
+<body style="margin:0;background:rgb(24, 24, 25)">
+    <canvas id="c"></canvas>
+    <script>
+        c.width = innerWidth
+        c.height = innerHeight
+        g = c.getContext('2d')
+
+        down = false
+        px = 0
+        py = 0
+
+        ac = new AudioContext
+
+        function beep(f) {
+            o = ac.createOscillator()
+            o.frequency.value = f
+            o.connect(ac.destination)
+            o.start()
+            o.stop(ac.currentTime + 0.3)
+        }
+
+        scale = [0, 2, 4, 7, 9]
+
+        function pitch(y) {
+            d = Math.floor((innerHeight - y) / innerHeight * 14.99)
+            oct = Math.floor(d / 5)
+            note = scale[d % 5]
+            return 110 * 2 ** (oct + note / 12)
+        }
+        
+        function line(x, y) {
+             g.strokeStyle = '#40e0d0'
+             g.lineWidth = 12
+             g.lineCap = 'round'
+             g.beginPath()
+             g.moveTo(px, py)
+             g.lineTo(x, y)
+             g.stroke()
+             px = x
+             py = y
+        }
+
+        onpointerdown = e => {
+            down = true
+            px = e.x
+            py = e.y
+            g.fillStyle = '#40e0d0'
+            g.beginPath()
+            g.arc(e.x, e.y, 7, 0, 7)
+            g.fill()
+            ac.resume()
+            beep(pitch(e.y))
+        }
+
+        onpointerup = e => {
+            down = false
+        }
+
+        onpointermove = e => {
+            if (down) line(e.x, e.y)
+        }
+    </script>
+</body>
